@@ -2,40 +2,39 @@
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-  $user   = filter_var($_POST['username'], FILTER_SANITIZE_SPECIAL_CHARS);
+  $name   = filter_var($_POST['name'], FILTER_SANITIZE_SPECIAL_CHARS);
   $email  = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
   $phone  = filter_var($_POST['phone'], FILTER_SANITIZE_NUMBER_INT);
+  $website= filter_var($_POST['website'], FILTER_SANITIZE_URL);
   $msg    = filter_var($_POST['msg'], FILTER_SANITIZE_SPECIAL_CHARS);
-
   $msg_error = array();
 
-  if (strlen($user) > 20) {
-    
-    $msg_error[] = "This Name is Larger Than 20 Character!";
+  if(!empty($email) && !empty($msg)) {
+
+    if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
+      $receiver = "haydarbigo@gmail.com";
+      $subject = "From: $name <$email>";
+      $body = "Name: $name\nEmail: $mail\nPhone: $phone\nWebsite: $website\n\nMessage: $msg\n\nRegards: $name";
+      $sender = "From: $email";
+      if(mail($receiver, $subject, $body, $sender)) {
+        $name    = '';
+        $email   = '';
+        $phone   = '';
+        $website = '';
+        $msg     = '';
+        $succsess = "<div class='alert alert-success'>Your message has been sent!</div>";
+      } else {
+        $msg_error[] =  "Sorry failed to send your message!";
+      }
+
+    } else {
+      $msg_error[] =  "Enter a valid Email!";
+    }
+
+  } else {
+    $msg_error[] = "Name, Email and Message Field is Recuired!";
   }
-  if (strlen($phone) > 11) {
-    $msg_error[] = "This Number is Large!";
-  }
-  if (strlen($msg) > 50) {
-    $msg_error[] = "This Message is Larger Than 50 Character!";
-  }
-
-  $to = "haydarbigo@mail.com";
-  $subject = "Contact Form";
-  $headers = "From:" . $email . "\r\n";
-
-  if(empty($msg_error)) {
-
-    mail($to, $subject, $msg, $headers);
-
-    $user  = '';
-    $email = '';
-    $phone = '';
-    $msg   = '';
-
-    $succsess = "<div class='alert alert-success'>We Have Recieved Your Message!</div>";
-  }
-
 
 }
 ?>
@@ -85,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" class="contact-form">
 
       <div class="form-group">
-        <input class="form-control" type="text" name="username" placeholder="UserName" value="<?php if(isset($user)){echo $user;}?>">
+        <input class="form-control" type="text" name="name" placeholder="Name" value="<?php if(isset($name)){echo $name;}?>">
         <span class="asterisk">*</span>
       </div>
       <div class="form-group">
@@ -94,6 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
       <div>
         <input class="form-control" type="text" name="phone" placeholder="Phone" value="<?php if(isset($phone)){echo $phone;}?>">
+      </div>
+      <div>
+        <input class="form-control" type="url" name="website" placeholder="Website" value="<?php if(isset($website)){echo $website;}?>">
       </div>
       <div class="form-group">
         <textarea class="form-control" name="msg" placeholder="Your Message..."><?php if(isset($msg)){echo $msg;}?></textarea>
